@@ -1,0 +1,38 @@
+
+name: EAS Build (Android)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Expo CLI
+        run: npm install -g eas-cli
+
+      - name: Install dependencies
+        run: |
+          cd mobile
+          npm install
+
+      - name: Login to Expo
+        run: eas whoami || eas login --token ${{ secrets.EAS_API_KEY }}
+
+      - name: Configure EAS Build
+        run: |
+          cd mobile
+          eas build:configure
+
+      - name: Build Android APK
+        run: |
+          cd mobile
+          eas build -p android --profile preview --non-interactive
